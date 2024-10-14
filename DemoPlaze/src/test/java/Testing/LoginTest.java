@@ -1,69 +1,44 @@
 package Testing;
 
-import org.example.Login;
-import org.example.Register;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.By;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
-public class LoginTest {
-    WebDriver driver;
-    Login loginPage;
-    @BeforeTest
-    public void setUp(){
-        driver=new ChromeDriver();
-        loginPage=new Login(driver);
+public class LoginTest extends BaseTest{
+@DataProvider(name ="login_data")
+public Object[][]loginData()
+{
+return new Object[][]{
+        { "esraa@gmail.com","esraa123456"},
+        { "esraa@gmail","esraa123456"},
+        { "esraa@gmail.com","esraa"},
+       { "",""}
+};
+    }
+    @Test(dataProvider = "login_data")
+    public void testLogin(String email, String password) throws InterruptedException {
         driver.get("https://indigoproviderportal.vercel.app/login");
-        driver.manage().window().fullscreen();
-    }
-    @BeforeMethod
-    public void t(){
-        driver.manage().window().fullscreen();
-    }
-    @Test
-    public void Test(){
-        var email="esraa@gmail.com";
-        var password="esraa123456";
-        loginPage.setEmail(email);
-        loginPage.setPassword(password);
-        Assert.assertEquals(email,"esraa@gmail.com","");
-        Assert.assertEquals(password,"esraa123456","");
+        loginPage.login(email, password);
+        Thread.sleep(500);
 
-    }
-    @Test
-    public void Test2(){
-        var email="esraa@gmail";
-        loginPage.setEmail(email);
-        Assert.assertEquals(email,"esraa@gmail","");
+        if (email.equals("esraa@gmail.com") && password.equals("esraa123456")) {
+            Assert.assertTrue(driver.getCurrentUrl().contains("https://indigoproviderportal.vercel.app/login"), "Login should be successful.");
+        } else if (email.isEmpty()) {
+            // Assert for empty email input
+            String errorMessage = driver.findElement(By.id("Email is required")).getText(); // Update with actual ID
+            Assert.assertEquals(errorMessage, "Email is required", "Error message for empty email should match.");
+        } else if (password.isEmpty()) {
+            // Assert for empty password input
+            String errorMessage = driver.findElement(By.id("Password is required")).getText(); // Update with actual ID
+            Assert.assertEquals(errorMessage, "Password is required", "Error message for empty password should match.");
+        } else if(email != "esraa@gmail.com") {
+            // Assert for invalid email format
+            String errorMessage = driver.findElement(By.id("Please enter a valid email")).getText(); // Update with actual ID
+            Assert.assertEquals(errorMessage, "Please enter a valid email", "Error message for invalid email should match.");
+       }
 
+        driver.navigate().refresh();
     }
-    @Test
-    public void Test3(){
-        var email="esraa@gmail.com";
-        var password="esraa";
-        loginPage.setEmail(email);
-        loginPage.setPassword(password);
-        Assert.assertEquals(email,"esraa@gmail.com","");
-        Assert.assertEquals(password,"esraa","");
-
-    }
-    @Test
-    public void Test4(){
-        var email="";
-        var password="";
-        loginPage.setEmail(email);
-        loginPage.setPassword(password);
-        Assert.assertEquals(email,"","");
-        Assert.assertEquals(password,"","");
-
-    }
-    @AfterTest
-    public void Quit(){
-        driver.quit();
-    }
-
 }
+
+
